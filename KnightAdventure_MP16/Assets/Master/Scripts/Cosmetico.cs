@@ -5,16 +5,15 @@ using UnityEngine;
 public class Cosmetico : MonoBehaviour
 {
     public string nombre;
-    public int precio;
-    public Sprite apariencia;
+    public int id;
+    private Store store;
 
-    public void Equipar(Player jugador)
+    private void Start()
     {
-        // Cambia la apariencia del jugador
-        SpriteRenderer renderer = jugador.GetComponent<SpriteRenderer>();
-        if (renderer != null)
-        {
-            renderer.sprite = apariencia;
-        }
+        store = FindObjectOfType<Store>();
+    }
+    public void CascoElegido()
+    {
+        store.Comprar(id);
     }
 }

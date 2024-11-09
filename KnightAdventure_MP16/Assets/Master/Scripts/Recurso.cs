@@ -4,10 +4,39 @@ using UnityEngine;
 
 public class Recurso : MonoBehaviour
 {
-    public enum TipoRecurso { Semilla, Comida, Material }
-    public TipoRecurso tipo;
-    public int cantidad;
+    public string nombreRecurso;
+    public int cantidad = 1;
+    private bool jugadorCerca = false;
+    public GameObject collectIcon;
 
-    // Prefab para el cultivo, útil si es un recurso de tipo Semilla
-    public GameObject cultivoPrefab;
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            jugadorCerca = true;
+            collectIcon.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            jugadorCerca = false;
+            collectIcon.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        if (jugadorCerca && Input.GetKeyDown(KeyCode.E))
+        {
+            Inventory inventory = FindObjectOfType<Inventory>();
+            if (inventory != null)
+            {
+                inventory.AddRecurso(nombreRecurso);
+                Destroy(gameObject);
+            }
+        }
+    }
 }

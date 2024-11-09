@@ -39,7 +39,7 @@ public class MovimientoEnemigo : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemigo") || collision.gameObject.CompareTag("Pared") || collision.gameObject.CompareTag("Limits"))
+        if (collision.gameObject.CompareTag("Enemigo") || collision.gameObject.CompareTag("Pared") || collision.gameObject.CompareTag("Limits") || collision.gameObject.CompareTag("Player"))
         {
             AjustarDireccionAlChocar(collision);
         }

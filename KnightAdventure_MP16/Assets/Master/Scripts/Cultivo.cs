@@ -4,32 +4,102 @@ using UnityEngine;
 
 public class Cultivo : MonoBehaviour
 {
-    public enum Estado { Sembrado, Creciendo, ListoParaCosechar }
-    public Estado estadoActual = Estado.Sembrado;
-    public float tiempoDeCrecimiento = 5f;
-    private float tiempoActual = 0f;
+    public enum TipoCultivo { Carrot, Onion }
+    public TipoCultivo tipoCultivo; // Selección desde el inspector
+    public SpriteRenderer sprCarrot;
+    public SpriteRenderer sprOnion;
+    public GameObject collectIcon;
+    public string nombreCosecha;
+    public int growingTime;
+    private bool canRecolect = false;
+    private bool canPlant = true;
 
-    public Recurso recursoCosecha;
+    public Sprite[] sprCarrot1;
+
+    private bool cercaDelJugador = false;
+    private Inventory inventario;
+    private UIController uiController;
+
+    private void Start()
+    {
+        inventario = FindObjectOfType<Inventory>();
+        uiController = FindObjectOfType<UIController>();
+        sprCarrot.enabled = false;
+        sprOnion.enabled = false;
+    }
 
     private void Update()
     {
-        if (estadoActual == Estado.Creciendo)
+        if (cercaDelJugador && Input.GetKeyDown(KeyCode.E) && !canRecolect && canPlant)
         {
-            tiempoActual += Time.deltaTime;
-            if (tiempoActual >= tiempoDeCrecimiento)
-            {
-                estadoActual = Estado.ListoParaCosechar;
-            }
+            Plantar();
+        }
+        if (cercaDelJugador && Input.GetKeyDown(KeyCode.E) && !canPlant && canRecolect)
+        {
+            Recolectar();
         }
     }
 
-    public Recurso Cosechar()
+    private void Plantar()
     {
-        if (estadoActual == Estado.ListoParaCosechar)
+        if (tipoCultivo == TipoCultivo.Carrot && inventario.GetCantidadRecurso("CarrotSeed") > 0)
         {
-            Destroy(gameObject);
-            return recursoCosecha;
+            inventario.RestarRecurso("CarrotSeed", 1);
+            uiController.ActualizarUI("CarrotSeed", inventario.GetCantidadRecurso("CarrotSeed"));
+            sprCarrot.enabled = true;
+            canPlant = false;
+            StartCoroutine(Creciendo());
         }
-        return null;
+        else if (tipoCultivo == TipoCultivo.Onion && inventario.GetCantidadRecurso("OnionSeed") > 0)
+        {
+            inventario.RestarRecurso("OnionSeed", 1);
+            uiController.ActualizarUI("OnionSeed", inventario.GetCantidadRecurso("OnionSeed"));
+            sprOnion.enabled = true;
+            canPlant = false;
+            StartCoroutine(Creciendo());
+        }
+        else
+        {
+
+        }
+    }
+    private void Recolectar()
+    {
+        if (canRecolect == true)
+        {
+            sprCarrot.enabled = false;
+            Inventory inventory = FindObjectOfType<Inventory>();
+            if (inventory != null)
+            {
+                inventory.AddRecurso(nombreCosecha);
+            }
+            canPlant = true;
+            canRecolect = false;
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            cercaDelJugador = true;
+            collectIcon.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            cercaDelJugador = false;
+            collectIcon.SetActive(false);
+        }
+    }
+    private IEnumerator Creciendo()
+    {
+        yield return new WaitForSeconds(growingTime);
+        sprCarrot.sprite = sprCarrot1[0];
+        yield return new WaitForSeconds(growingTime);
+        sprCarrot.sprite = sprCarrot1[1];
+        canRecolect = true;
     }
 }
